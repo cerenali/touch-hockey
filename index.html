@@ -3,10 +3,20 @@
     <meta name="viewport" content="width=device-width">
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" type="text/css" href="buttons.css" />
     <title>iPod air hockey</title>
   </head>
-  <body style="margin:0">
-    <canvas id="canvas" />
+  <body>
+    <form name="form">
+      <div id="buttons">
+        <input id="button" type="button" value="restart" onClick="restart()" />
+      </div>
+    </form>
+    <canvas id="canvas" width="500" height="500" />
+    <script src="requestAnimFrame.js"></script>
+    <script src="view.js"></script>
+    <script src="model.js"></script>
+    <script src="controller.js"></script>
     <script src="hockey.js"></script>
   </body>
 </html>

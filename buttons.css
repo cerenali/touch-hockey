@@ -1,0 +1,10 @@
+body {
+  margin: 0px;
+  padding: 0px;
+  position: fixed;
+}
+form #buttons {
+  position: absolute; 
+  top: 2px; 
+  left: 2px;
+}
