@@ -138,7 +138,7 @@ function pointMove(x, y, id){
     
     // prevent weird invisible mallet bug
     // ensure mallets are on correct side
-    /*if(circle.type == MALLET){
+    if(circle.type == MALLET){
       if(circle.player == ONE){
         if(circle.y > centerY - circle.radius)
           circle.y = centerY - circle.radius;
@@ -146,8 +146,9 @@ function pointMove(x, y, id){
       else if (circle.player == TWO){
         if(circle.y < centerY + circle.radius)
           circle.y = centerY + circle.radius;
-      }*/
+      }
     }
+  }
 }
 ///
 canvas.addEventListener("mousedown", function(e){

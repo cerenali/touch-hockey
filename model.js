@@ -120,16 +120,6 @@ function iterateSimulation(){
         circle.x = xLeft + circle.radius;
         circle.velocity.x = Math.abs(circle.velocity.x);
     }
-    // centerline
-    if(circle.player == ONE){
-      if(circle.y > centerY - circle.radius){
-        circle.y = centerY - circle.radius;
-      }
-    }else if (circle.player == TWO){
-      if(circle.y < centerY + circle.radius){
-        circle.y = centerY + circle.radius;
-      }
-    }
     
     // REPULSION between circles
     var circle2, j, i;
