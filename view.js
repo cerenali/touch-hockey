@@ -30,37 +30,41 @@ function drawCircle(circle){
 }
 
 function drawBoard(){
-  c.strokeStyle = "363636";
+  c.strokeStyle = "black";
+  c.lineWidth = 2;
   
   // draw border
-  c.lineWidth = 5;
   c.strokeRect(0,0,canvas.width,canvas.height);
   
   // draw goals: bottom
   c.beginPath();
-  c.moveTo(0, canvas.height - malletRadius*3);
-  c.lineTo(canvas.width, canvas.height - malletRadius*3);
+  c.moveTo(goalLeft, canvas.height);
+  c.lineTo(goalLeft, canvas.height - goalHeight);
+  c.lineTo(goalRight, canvas.height - goalHeight);
+  c.lineTo(goalRight, canvas.height);
   c.stroke();
   c.closePath();
   
   // draw goals: top
   c.beginPath();
-  c.moveTo(0, malletRadius*3);
-  c.lineTo(canvas.width, malletRadius*3);
+  c.moveTo(goalLeft, 0);
+  c.lineTo(goalLeft, goalHeight);
+  c.lineTo(goalRight, goalHeight);
+  c.lineTo(goalRight, 0);
   c.stroke();
   c.closePath();
   
   // draw sidelines: left
   c.beginPath();
-  c.moveTo(puckRadius*3, malletRadius*3);
-  c.lineTo(puckRadius*3, canvas.height - malletRadius*3);
+  c.moveTo(puckRadius*3, 0);
+  c.lineTo(puckRadius*3, canvas.height);
   c.stroke();
   c.closePath();
   
   // draw sidelines: right
   c.beginPath();
-  c.moveTo(canvas.width - puckRadius*3, malletRadius*3);
-  c.lineTo(canvas.width - puckRadius*3, canvas.height - malletRadius*3);
+  c.moveTo(canvas.width - puckRadius*3, 0);
+  c.lineTo(canvas.width - puckRadius*3, canvas.height);
   c.stroke();
   c.closePath();
   

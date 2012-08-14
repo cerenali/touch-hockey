@@ -1,8 +1,27 @@
+function behindTopGoal(circle){
+  var behindTopGoal = circle.y < -circle.radius;
+  return behindTopGoal;
+}
+
+function behindBottomGoal(circle){
+  var behindBottomGoal = circle.y > canvas.height + circle.radius;
+  return behindBottomGoal;
+}
+
+function isNotInGoal(circle){
+    if(circle.type == PUCK){
+      var inGoalLeft = circle.x - circle.radius > centerX - goalLeft;
+      var inGoalRight = circle.x + circle.radius < centerX + goalLeft;
+      var isInGoal = inGoalLeft && inGoalRight;
+      return !isInGoal;
+    }
+}
+
 function scoring(){
-  if(didP1Score || didP2Score){
+  /*if(didP1Score || didP2Score){
     // reset puck position
     resetPuck();
-  }
+  }*/
   
   if(didP1Score){
     p1Score++;
@@ -28,20 +47,43 @@ function getCircleUnderPoint(x, y){
   return undefined;
 }
 
+/*function isBehindGoal(circle){
+  var behindTopGoal = circle.y < -circle.radius;
+  var behindBottomGoal = circle.y > canvas.width + circle.radius;
+  return behindTopGoal || behindBottomGoal;
+}*/
+
 function resetPuck(){
-  // return puck to original position
-  circles[0] = {
+  // return puck *AND MALLETS* to original position
+  circles = [
+    {
       type: PUCK,
-      totalPucks: "totalPucks--",
+      totalPucks: 8,
       x: centerX,
       y: centerY,
       radius: puckRadius,
       color: "363636",
       velocity: {x:0, y:0}
-    };
-  
-  // reset scores
-  //p1Score = 0, p2Score = 0;
+    },
+    {
+      type: MALLET,
+      player: ONE,
+      x: centerX,
+      y: malletRadius*1.5,
+      radius: malletRadius,
+      color: "E0173F",
+      velocity: {x:0, y:0}
+    },
+    {
+      type: MALLET,
+      player: TWO,
+      x: centerX,
+      y: canvas.height - malletRadius*1.5,
+      radius: malletRadius,
+      color: "1A5D9C",
+      velocity: {x:0, y:0}
+    }
+  ];
 }
 
 function restart(){
@@ -78,67 +120,71 @@ function restart(){
   p1Score = 0, p2Score = 0;
 }
 
-function addMouseListeners(){
-  canvas.addEventListener("mousedown", function(e){
-    var circleUnderMouse = getCircleUnderPoint(e.clientX, e.clientY);
-    if(circleUnderMouse && circleUnderMouse.type == MALLET)
-      circlesBeingMoved[mouseId] = circleUnderMouse;
-    mouseDown = true;
-  });
-  
-  canvas.addEventListener("mouseup", function(e){
-    mouseDown = false;
-    if(circlesBeingMoved[mouseId])
-      delete circlesBeingMoved[mouseId];
-  });
-  
-  canvas.addEventListener("mouseout", function(e){
-    mouseDown = false;
-  });
-  
-  canvas.addEventListener("mousemove", function(e){
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    var circleUnderMouse = circlesBeingMoved[mouseId];  
-    if(circleUnderMouse){
-      circleUnderMouse.x = mouseX;
-      circleUnderMouse.y = mouseY;
-    }
-  });
+// user interaction (mouse & touch)
+function pointDown(x, y, id){
+  var circleUnderPoint = getCircleUnderPoint(x, y);
+  if(circleUnderPoint && circleUnderPoint.type == MALLET)
+    circlesBeingMoved[id] = circleUnderPoint;
 }
-
-function addMultiTouchListeners(){
-  canvas.addEventListener('touchstart',function(e){
-    if(e.changedTouches.length > 0){
-      var touch = e.changedTouches[0];
-      
-      var circleUnderTouch = getCircleUnderPoint(touch.pageX, touch.pageY);
-      if(circleUnderTouch && circleUnderTouch.type == MALLET)
-        circlesBeingMoved[touch.identifier] = circleUnderTouch;
-    }
-  });
-  
-  canvas.addEventListener('touchmove',function(e){
-    if(e.changedTouches.length > 0){
-      var touch = e.changedTouches[0];
-      var circleUnderTouch = circlesBeingMoved[touch.identifier];
-      if(circleUnderTouch){
-        circleUnderTouch.x = touch.pageX;
-        circleUnderTouch.y = touch.pageY;
+function pointUp(id){
+  if(circlesBeingMoved[id])
+    delete circlesBeingMoved[id];
+}
+function pointMove(x, y, id){
+  var circle = circlesBeingMoved[id];
+  if(circle){
+    circle.x = x;
+    circle.y = y;
+    
+    // prevent weird invisible mallet bug
+    // ensure mallets are on correct side
+    /*if(circle.type == MALLET){
+      if(circle.player == ONE){
+        if(circle.y > centerY - circle.radius)
+          circle.y = centerY - circle.radius;
       }
+      else if (circle.player == TWO){
+        if(circle.y < centerY + circle.radius)
+          circle.y = centerY + circle.radius;
+      }*/
     }
-  });
-  
-  canvas.addEventListener('touchend',function(e){
-    if(e.changedTouches.length > 0){
-      var touch = e.changedTouches[0];
-      if(circlesBeingMoved[touch.identifier])
-        delete circlesBeingMoved[touch.identifier];
-    }
-  });
 }
+///
+canvas.addEventListener("mousedown", function(e){
+  pointDown(e.clientX, e.clientY, mouseId);
+});
+canvas.addEventListener('touchstart',function(e){
+  var i;
+  for(i = 0; i < e.changedTouches.length; i++){
+    var touch = e.changedTouches[i];
+    pointDown(touch.pageX, touch.pageY, touch.identifier);
+  }
+});
 
-// disable scrolling in iOS
-document.body.addEventListener('touchmove', function(e) {
-e.preventDefault();
-}, false);
+canvas.addEventListener("mouseup", function(e){
+  pointUp(mouseId);
+});
+canvas.addEventListener("mouseout", function(e){
+  pointUp(mouseId);
+});
+canvas.addEventListener('touchend',function(e){
+  var i;
+  for(i = 0; i < e.changedTouches.length; i++){
+    var touch = e.changedTouches[i];
+    pointUp(touch.identifier);
+  }
+});
+
+canvas.addEventListener("mousemove", function(e){
+  pointMove(e.clientX, e.clientY, mouseId);
+});
+canvas.addEventListener('touchmove',function(e){
+  var i;
+  for(i = 0; i < e.changedTouches.length; i++){
+    var touch = e.changedTouches[i];
+    pointMove(touch.pageX, touch.pageY, touch.identifier);
+  }
+  
+  // prevent default scrolling in iOS
+  e.preventDefault();
+});

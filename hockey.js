@@ -15,8 +15,5 @@ function executeFrame(){
   }
 }
 
-addMultiTouchListeners();
-addMouseListeners();
-
 // start animation
 executeFrame();

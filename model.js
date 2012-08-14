@@ -1,10 +1,13 @@
 var centerX = canvas.width / 2;
 var centerY = canvas.height / 2;
 
-var malletRadius = 30;
+var malletRadius = 60;
 var puckRadius = malletRadius / 2;
-var mouseDown = false;
-var mouseX, mouseY;
+var goalLeft = centerX/2;
+var goalRight = centerX*3/2;
+var goalHeight = malletRadius/5;
+var sidelineWidth = puckRadius*3;
+
 var mouseId = "mouse";
 
 var PUCK = "puck";
@@ -54,55 +57,68 @@ var circles = [
 
 function iterateSimulation(){
   var circle;
-  for(var id in circlesBeingMoved){
-    circle = circlesBeingMoved[id];
-    circle.velocity.x = 0;
-    circle.velocity.y = 0;
-  }
+  var xLeft = sidelineWidth;
+  var xRight = canvas.width - sidelineWidth;
   
   for(i = 0; i < circles.length; i++){
     circle = circles[i];
     
-    // slows things down
-    circle.velocity.x *= dampeningFactor;
-    circle.velocity.y *= dampeningFactor;
-    
     // Add velocity to position (puck only)
     if(circle.type == PUCK){
+      
+      // if the circle is inside a goal, reset it to the center and note who scored
+      if(behindTopGoal(circle)){
+          didP2Score = true;
+          resetPuck();
+      }
+      else if(behindBottomGoal(circle)){
+          didP1Score = true;
+          resetPuck();
+      }
+      
+      // slows things down
+      circle.velocity.x *= dampeningFactor;
+      circle.velocity.y *= dampeningFactor;
       circle.x += circle.velocity.x;
       circle.y += circle.velocity.y;
       
-      // PUCK: note if puck enters goal (bottom)
-      if(circle.y > canvas.height - (malletRadius*3 - circle.radius)){
-        didP1Score = true;
-      } // note if puck enters goal (top)
-      if(circle.y < malletRadius*3 - circle.radius){
-        didP2Score = true;
-      }
-      // bounce off right wall
-      if(circle.x > canvas.width - (puckRadius*3 + circle.radius)){
-        circle.x = canvas.width - (puckRadius*3 + circle.radius);
-        circle.velocity.x = -Math.abs(circle.velocity.x);
-      } // bounce off left wall
-      if(circle.x < puckRadius*3 + circle.radius){
-        circle.x = puckRadius*3 + circle.radius;
-        circle.velocity.x = Math.abs(circle.velocity.x);
+      // floor
+      if(circle.y > canvas.height - circle.radius && isNotInGoal(circle)){
+        circle.y = canvas.height - circle.radius;
+        circle.velocity.y = -Math.abs(circle.velocity.y);
+      } // ceiling
+      if(circle.y < circle.radius && isNotInGoal(circle)){
+        circle.y = circle.radius;
+        circle.velocity.y = Math.abs(circle.velocity.y);
       }
     }
     
-    // MALLETS: boundaries
+    // boundaries
     // floor
-    if(circle.y > canvas.height - circle.radius){
+    if(circle.y > canvas.height - circle.radius && circle.type == MALLET){
       circle.y = canvas.height - circle.radius;
+      //circle.velocity.y = -Math.abs(circle.velocity.y);
     } // ceiling
-    if(circle.y < circle.radius){
+    if(circle.y < circle.radius && circle.type == MALLET){
       circle.y = circle.radius;
-    } // right sideline
-    if(circle.x > canvas.width - (puckRadius*3 + circle.radius)){
-      circle.x = canvas.width - (puckRadius*3 + circle.radius);
+      //circle.velocity.y = Math.abs(circle.velocity.y);
+    }
+    // bounce off right wall
+    if(circle.x > xRight - circle.radius){
+      circle.x = xRight - circle.radius;
+      circle.velocity.x = -Math.abs(circle.velocity.x);
+    } // bounce off left wall
+    if(circle.x < xLeft + circle.radius){
+      circle.x = xLeft + circle.radius;
+      circle.velocity.x = Math.abs(circle.velocity.x);
+    }// right sideline (velocity for puck)
+    if(circle.x > xRight - circle.radius){
+        circle.x = xRight - circle.radius;
+        circle.velocity.x = -Math.abs(circle.velocity.x);
     } // left sideline
-    if(circle.x < puckRadius*3 + circle.radius){
-      circle.x = puckRadius*3 + circle.radius;
+    if(circle.x < xLeft + circle.radius){
+        circle.x = xLeft + circle.radius;
+        circle.velocity.x = Math.abs(circle.velocity.x);
     }
     // centerline
     if(circle.player == ONE){
