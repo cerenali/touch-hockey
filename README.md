@@ -1,4 +1,4 @@
 touch-hockey
 ============
 
-supposedly.
+Junction class project
